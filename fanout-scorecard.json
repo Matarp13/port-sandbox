@@ -1,5 +1,5 @@
 {
-  "identifier": "matar-scorecard"
+  "identifier": "matar-scorecard",
   "title": "matar scorecard",
   "levels": [{"color": "paleBlue", "title": "Basic"},{"color": "gold", "title": "Gold"}],
   "filter": {"combinator": "or", "conditions": [{"value": "aleph", "operator": "=", "property": "$title"}, {"value": "blackbird", "operator": "=", "property": "$title"}, {"value": "blackbird-mw", "operator": "=", "property": "$title"}]}
