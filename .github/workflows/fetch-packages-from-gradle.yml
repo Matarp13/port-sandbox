@@ -30,8 +30,7 @@ jobs:
           GRADLE_PATH: ${{ github.event.inputs.gradle_path }}
         run: |
           python ./extract_gradle_plugins.py > plugins.json
-          plugins_json=$(cat plugins.json)
-          echo "plugins=$plugins_json" >> $GITHUB_OUTPUT
+          echo "plugins=$(cat plugins.json)" >> $GITHUB_OUTPUT
 
       - name: Debug Plugins Output
         run: |
@@ -44,4 +43,4 @@ jobs:
           clientSecret: ${{ secrets.CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: BULK_UPSERT
-          entities: ${{ toJson(env.PLUGINS_JSON) }}
+          entities: ${{ toJson(steps.parse-plugins.outputs.plugins) }}
