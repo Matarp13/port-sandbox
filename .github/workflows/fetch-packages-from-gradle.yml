@@ -35,7 +35,6 @@ jobs:
 
       - name: Debug Plugins Output
         run: |
-          echo "Decoded Plugins JSON:"
           echo "$PLUGINS_JSON_BASE64" | base64 --decode
 
       - name: Bulk Upsert Plugins to Port
