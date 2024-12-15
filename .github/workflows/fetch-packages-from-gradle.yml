@@ -6,7 +6,7 @@ on:
       gradle_file_path:
         description: "Path to the Gradle file"
         required: true
-        default: /build.gradle
+        default: ./build.gradle
 
 jobs:
   update-port-blueprints:
@@ -20,7 +20,7 @@ jobs:
         id: read-gradle
         uses: juliangruber/read-file-action@v1
         with:
-          path: ${{ github.event.inputs.gradle_path }}
+          path: ${{ github.event.inputs.gradle_file_path }}
 
       - name: Extract packages and versions
         id: parse-packages
