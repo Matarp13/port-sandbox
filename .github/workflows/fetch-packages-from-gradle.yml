@@ -1,9 +1,12 @@
 name: Update Port Blueprints
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
-      gradle_file_path:
+      gradle_path:
         description: "Path to the Gradle file"
         required: true
         default: ./build.gradle
@@ -16,23 +19,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Read Gradle file content
-        id: read-gradle
-        uses: juliangruber/read-file-action@v1
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          path: ${{ github.event.inputs.gradle_file_path }}
+          python-version: "3.x"
 
-      - name: Extract packages and versions
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Extract Packages from Gradle File
         id: parse-packages
-        run: |
-          echo "Parsing Gradle file..."
-          gradle_content="${{ steps.read-gradle.outputs.content }}"
-          packages=$(echo "$gradle_content" | grep -oP 'implementation\s+["\']\K[^"\']+' | awk -F':' '{printf "{\"identifier\": \"%s:%s\", \"blueprint\": \"package\", \"properties\": {\"package\": \"%s:%s\", \"version\": \"%s\"}},", $1, $2, $1, $2, $3}' | jq -s '.')
-          echo "::set-output name=packages::$packages"
         env:
-          GRADLE_CONTENT: ${{ steps.read-gradle.outputs.content }}
+          GRADLE_PATH: ${{ github.event.inputs.gradle_path }}
+        run: |
+          python scripts/extract_gradle_packages.py > packages.json
+          echo "::set-output name=packages::$(cat packages.json)"
 
-      - name: Bulk Upsert Packages
+      - name: Bulk Upsert Packages to Port
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.CLIENT_ID }}
@@ -41,19 +44,3 @@ jobs:
           operation: BULK_UPSERT
           blueprint: package
           entities: ${{ steps.parse-packages.outputs.packages }}
-
-      - name: Update Service Relations in Port
-        uses: port-labs/port-github-action@v1
-        with:
-          clientId: ${{ secrets.CLIENT_ID }}
-          clientSecret: ${{ secrets.CLIENT_SECRET }}
-          baseUrl: https://api.getport.io
-          operation: PATCH
-          entity: ${{ github.repository }}
-          blueprint: service
-          properties: |
-            {
-              "relations": {
-                "packages": ${{ steps.parse-packages.outputs.packages }}
-              }
-            }
