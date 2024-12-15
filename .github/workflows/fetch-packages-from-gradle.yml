@@ -34,7 +34,8 @@ jobs:
           echo "plugins=$plugins_string" >> $GITHUB_ENV
 
       - name: Debug Plugins Output
-        run: echo "Plugins JSON: ${{ env.plugins }}"
+        run: |
+          echo "Plugins JSON: ${{ env.plugins }}"
 
       - name: Bulk Upsert Plugins to Port
         uses: port-labs/port-github-action@v1
