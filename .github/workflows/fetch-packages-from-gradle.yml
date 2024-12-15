@@ -36,6 +36,12 @@ jobs:
           plugins_json=$(jq -c . plugins.json)
           echo "plugins=$plugins_json" >> $GITHUB_OUTPUT
 
+
+      - name: Debug Plugins Output
+        id: debug_test
+        run: | 
+          echo "Plugins JSON: ${{ steps.parse-plugins.outputs.plugins }}"        
+          
       - name: Bulk Upsert Plugins to Port
         uses: port-labs/port-github-action@v1
         with:
