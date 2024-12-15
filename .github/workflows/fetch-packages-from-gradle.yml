@@ -42,5 +42,4 @@ jobs:
           clientSecret: ${{ secrets.CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: BULK_UPSERT
-          blueprint: package
           entities: ${{ steps.parse-packages.outputs.packages }}
