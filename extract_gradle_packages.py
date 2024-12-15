@@ -2,57 +2,53 @@ import os
 import re
 import json
 
-
-def parse_gradle_file(file_path):
+def parse_plugins_from_gradle(file_path):
     """
-    Parses a Gradle file to extract package and version details.
+    Parses a Gradle file to extract plugins and maps them as package entities.
 
     Args:
         file_path (str): Path to the Gradle file.
 
     Returns:
-        list: A list of package dictionaries with "identifier", "blueprint", and "properties".
+        list: A list of package entities formatted for Port's BULK_UPSERT.
     """
-    packages = []
+    entities = []
+
+    # Regex to match plugin declarations
+    plugin_pattern = re.compile(r"id\s+['\"]([^'\"]+)['\"]\s+version\s+['\"]([^'\"]+)['\"]")
+
     try:
-        with open(file_path, "r") as file:
+        with open(file_path, "r", encoding="utf-8") as file:
             content = file.read()
+            matches = plugin_pattern.findall(content)
 
-        # Regex to match Gradle implementation dependencies
-        pattern = r'implementation\s+["\']([^:]+):([^:]+):([^"\']+)["\']'
-        matches = re.findall(pattern, content)
-
-        for group, name, version in matches:
-            package_name = f"{group}:{name}"
-            packages.append({
-                "identifier": package_name,
-                "blueprint": "package",
-                "properties": {
-                    "package": package_name,
-                    "version": version
-                }
-            })
+            for plugin, version in matches:
+                entities.append({
+                    "identifier": plugin,
+                    "blueprint": "package",
+                    "properties": {
+                        "package": plugin,
+                        "version": version
+                    }
+                })
 
     except FileNotFoundError:
         print(f"Error: Gradle file not found at {file_path}")
     except Exception as e:
-        print(f"Error parsing Gradle file: {e}")
+        print(f"Error parsing file: {e}")
 
-    return packages
-
+    return entities
 
 def main():
-    # Get the Gradle file path from the environment
     gradle_path = os.getenv("GRADLE_PATH")
     if not gradle_path:
         raise ValueError("GRADLE_PATH environment variable is not set.")
 
     # Parse the Gradle file
-    packages = parse_gradle_file(gradle_path)
+    entities = parse_plugins_from_gradle(gradle_path)
 
-    # Output the packages as JSON
-    print(json.dumps(packages, indent=2))
-
+    # Output the result in JSON format for Port
+    print(json.dumps(entities, indent=2))
 
 if __name__ == "__main__":
     main()
