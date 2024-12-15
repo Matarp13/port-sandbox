@@ -33,7 +33,7 @@ jobs:
           echo "::set-output name=packages::$(cat packages.json)"
 
       - name: Bulk Upsert Packages to Port
-        uses: port-labs/port-github-action@v1
+        uses: port-labs/port-github-action@v1.7.3
         with:
           clientId: ${{ secrets.CLIENT_ID }}
           clientSecret: ${{ secrets.CLIENT_SECRET }}
