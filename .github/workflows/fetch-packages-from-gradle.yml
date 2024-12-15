@@ -34,7 +34,7 @@ jobs:
 
       - name: Debug Plugins Output
         run: |
-          echo "$PLUGINS_JSON"
+          echo "${{ steps.parse-plugins.outputs.plugins }}"
 
       - name: Bulk Upsert Plugins to Port
         uses: port-labs/port-github-action@v1
