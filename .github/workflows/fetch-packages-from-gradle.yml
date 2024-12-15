@@ -30,7 +30,8 @@ jobs:
           GRADLE_PATH: ${{ github.event.inputs.gradle_path }}
         run: |
           python ./extract_gradle_plugins.py > plugins.json
-          echo "PLUGINS_JSON=$plugins.json" >> $GITHUB_ENV
+          plugins_json=$(cat plugins.json)
+          echo "plugins=$plugins_json" >> $GITHUB_OUTPUT
 
       - name: Debug Plugins Output
         run: |
