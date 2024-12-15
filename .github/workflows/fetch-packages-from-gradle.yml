@@ -1,4 +1,4 @@
-name: Update Port Blueprints
+name: Extract and Upsert Gradle Plugins to Port
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
         default: ./build.gradle
 
 jobs:
-  update-port-blueprints:
+  update-port-plugins:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,27 +21,19 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Install dependencies
-        run: pip install requests
-
-      - name: Extract Packages from Gradle File
-        id: parse-packages
+      - name: Extract Plugins from Gradle File
+        id: parse-plugins
         env:
           GRADLE_PATH: ${{ github.event.inputs.gradle_path }}
         run: |
-          python extract_gradle_packages.py > packages.json
-          echo "::set-output name=packages::$(cat packages.json)"
+          python extract_gradle_plugins.py > plugins.json
+          echo "plugins=$(cat plugins.json)" >> $GITHUB_OUTPUT
 
-      - name: Debug Python Output
-        run: |
-          echo "Checking generated packages.json..."
-          cat packages.json
-      
-      - name: Bulk Upsert Packages to Port
-        uses: port-labs/port-github-action@v1.7.3
+      - name: Bulk Upsert Plugins to Port
+        uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.CLIENT_ID }}
           clientSecret: ${{ secrets.CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: BULK_UPSERT
-          entities: ${{ steps.parse-packages.outputs.packages }}
+          entities: ${{ steps.parse-plugins.outputs.plugins }}
