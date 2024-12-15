@@ -30,12 +30,11 @@ jobs:
           GRADLE_PATH: ${{ github.event.inputs.gradle_path }}
         run: |
           python ./extract_gradle_plugins.py > plugins.json
-          plugins_base64=$(cat plugins.json | base64)
-          echo "PLUGINS_JSON_BASE64=$plugins_base64" >> $GITHUB_ENV
+          echo "PLUGINS_JSON=$plugins.json" >> $GITHUB_ENV
 
       - name: Debug Plugins Output
         run: |
-          echo "$PLUGINS_JSON_BASE64" | base64 --decode
+          echo "$PLUGINS_JSON"
 
       - name: Bulk Upsert Plugins to Port
         uses: port-labs/port-github-action@v1
@@ -44,4 +43,4 @@ jobs:
           clientSecret: ${{ secrets.CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: BULK_UPSERT
-          entities: ${{ fromJson(env.PLUGINS_JSON_BASE64 | fromBase64) }}
+          entities: ${{ toJson(env.PLUGINS_JSON) }}
