@@ -1,9 +1,6 @@
 name: Extract and Upsert Gradle Plugins to Port
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       gradle_path:
