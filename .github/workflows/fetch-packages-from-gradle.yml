@@ -24,24 +24,18 @@ jobs:
       - name: Install Python dependencies
         run: pip install --upgrade pip
 
-      - name: Install jq (if not pre-installed)
-        run: sudo apt-get install -y jq
-
       - name: Extract Plugins from Gradle File
         id: parse-plugins
         env:
           GRADLE_PATH: ${{ github.event.inputs.gradle_path }}
         run: |
           python ./extract_gradle_plugins.py > plugins.json
-          plugins_json=$(jq -c . plugins.json)
-          echo "plugins=$plugins_json" >> $GITHUB_OUTPUT
-
+          echo "plugins=$(cat plugins.json | tr '\n' ' ' | sed 's/\"/\\\"/g')" >> $GITHUB_OUTPUT
 
       - name: Debug Plugins Output
-        id: debug_test
-        run: | 
-          echo "Plugins JSON: ${{ steps.parse-plugins.outputs.plugins }}"        
-          
+        run: |
+          echo "Plugins JSON: ${{ steps.parse-plugins.outputs.plugins }}"
+
       - name: Bulk Upsert Plugins to Port
         uses: port-labs/port-github-action@v1
         with:
