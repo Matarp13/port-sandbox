@@ -32,6 +32,11 @@ jobs:
           python scripts/extract_gradle_packages.py > packages.json
           echo "::set-output name=packages::$(cat packages.json)"
 
+      - name: Debug Python Output
+        run: |
+          echo "Checking generated packages.json..."
+          cat packages.json
+      
       - name: Bulk Upsert Packages to Port
         uses: port-labs/port-github-action@v1.7.3
         with:
