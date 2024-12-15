@@ -1,6 +1,9 @@
 name: Extract and Upsert Gradle Plugins to Port
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       gradle_path:
@@ -21,14 +24,23 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Install Python dependencies
+        run: pip install --upgrade pip
+
+      - name: Install jq (if not pre-installed)
+        run: sudo apt-get install -y jq
+
       - name: Extract Plugins from Gradle File
         id: parse-plugins
         env:
           GRADLE_PATH: ${{ github.event.inputs.gradle_path }}
         run: |
-          python extract_gradle_plugins.py > plugins.json
-          echo "plugins=$(cat plugins.json)" >> $GITHUB_OUTPUT
+          python scripts/extract_gradle_plugins.py > plugins.json
+          echo "plugins=$(jq -c . plugins.json)" >> $GITHUB_OUTPUT
 
+      - name: Debug Plugins Output
+        run: echo "Plugins JSON: ${{ steps.parse-plugins.outputs.plugins }}"
+        
       - name: Bulk Upsert Plugins to Port
         uses: port-labs/port-github-action@v1
         with:
